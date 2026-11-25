@@ -2,140 +2,168 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Chismes al aire</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --fondo:#0f0e0c;
-    --papel:#efe9dc;
-    --suave:#a39d90;
-    --rojo:#e5402a;
-    --vidrio:rgba(239,233,220,.06);
-    --borde:rgba(239,233,220,.14);
-  }
-  *{box-sizing:border-box}
-  body{margin:0;min-height:100vh;background:var(--fondo);color:var(--papel);
-    font-family:'Inter',sans-serif;font-size:17px;line-height:1.5;
-    display:flex;justify-content:center;align-items:center;padding:28px 18px}
-  main{width:100%;max-width:520px}
+:root{--fondo:#0f0e0c;--papel:#efe9dc;--suave:#a39d90;--rojo:#e5402a;--verde:#4caf72;--borde:rgba(239,233,220,.14);--rebote:cubic-bezier(.34,1.56,.64,1)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;min-height:100vh;background:var(--fondo);color:var(--papel);font-family:'Inter',sans-serif;font-size:17px;line-height:1.5;display:flex;justify-content:center;align-items:center;padding:calc(env(safe-area-inset-top) + 24px) 18px calc(env(safe-area-inset-bottom) + 24px);overflow-x:hidden}
+main{width:100%;max-width:520px}
+svg{stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 
-  .alaire{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border:1.5px solid var(--rojo);
-    border-radius:6px;color:var(--rojo);font-weight:700;font-size:.8em;letter-spacing:.12em}
-  .alaire i{width:9px;height:9px;border-radius:50%;background:var(--rojo);animation:latido 1.6s infinite}
-  @keyframes latido{50%{opacity:.25}}
+.entra>*{animation:entra .6s var(--rebote) both}
+.entra>*:nth-child(2){animation-delay:.08s}.entra>*:nth-child(3){animation-delay:.16s}
+.entra>*:nth-child(4){animation-delay:.24s}.entra>*:nth-child(5){animation-delay:.32s}
+@keyframes entra{from{opacity:0;transform:translateY(26px) scale(.96)}}
+.sale{animation:sale .35s ease forwards}
+@keyframes sale{to{opacity:0;transform:translateY(-20px) scale(.96)}}
 
-  h1{font-family:'Instrument Serif',serif;font-weight:400;font-size:3.4em;line-height:1;margin:22px 0 10px}
-  .bajada{color:var(--suave);margin:0 0 24px;font-size:1.05em}
+.alaire{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border:1.5px solid var(--rojo);border-radius:6px;color:var(--rojo);font-weight:700;font-size:.8em;letter-spacing:.12em}
+.alaire i{width:9px;height:9px;border-radius:50%;background:var(--rojo);animation:late 1.6s ease-in-out infinite}
+@keyframes late{0%,100%{box-shadow:0 0 0 0 rgba(229,64,42,.6)}50%{box-shadow:0 0 0 8px rgba(229,64,42,0);opacity:.5}}
+.alaire.verde{border-color:var(--verde);color:var(--verde)}
+.alaire.verde i{background:var(--verde);animation:none}
 
-  .tarjeta{background:var(--vidrio);border:1px solid var(--borde);border-radius:20px;padding:20px;
-    backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
-  textarea{width:100%;height:170px;background:transparent;border:none;outline:none;resize:none;
-    color:var(--papel);font-family:inherit;font-size:1.1em}
-  textarea::placeholder{color:var(--suave)}
-  .pie{display:flex;justify-content:space-between;align-items:center;margin-top:10px;
-    color:var(--suave);font-size:.85em}
+h1{font-family:'Instrument Serif',serif;font-weight:400;font-size:3.4em;line-height:1;margin:22px 0 10px}
+.bajada{color:var(--suave);margin:0 0 24px;font-size:1.05em}
 
-  button{background:var(--papel);color:var(--fondo);border:none;border-radius:12px;
-    padding:14px 22px;font-family:inherit;font-weight:700;font-size:1em;cursor:pointer}
-  button:active{transform:scale(.97)}
-  button:disabled{opacity:.5}
-  .ancho{width:100%;margin-top:22px}
+.tarjeta{background:rgba(239,233,220,.06);border:1px solid var(--borde);border-radius:20px;padding:20px;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);transition:border-color .3s,transform .3s var(--rebote),box-shadow .3s}
+.tarjeta.foco{border-color:rgba(239,233,220,.45);transform:scale(1.02);box-shadow:0 12px 40px rgba(0,0,0,.45)}
+.temblor{animation:temblor .4s}
+@keyframes temblor{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+textarea{width:100%;height:170px;background:transparent;border:none;outline:none;resize:none;color:var(--papel);font-family:inherit;font-size:1.1em}
+textarea::placeholder{color:var(--suave)}
+.pie{display:flex;justify-content:space-between;align-items:center;margin-top:10px;color:var(--suave);font-size:.85em}
+#contador{transition:color .3s}
+#contador.cerca{color:var(--rojo)}
 
-  .cuenta{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:18px 0 6px}
-  .cuenta div{text-align:center}
-  .cuenta b{display:block;font-family:'Instrument Serif',serif;font-weight:400;font-size:3em;line-height:1}
-  .cuenta span{color:var(--suave);font-size:.8em}
-  .aviso{color:var(--suave);margin:0}
+button{background:var(--papel);color:var(--fondo);border:none;border-radius:12px;padding:14px 22px;font-family:inherit;font-weight:700;font-size:1em;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:transform .35s var(--rebote),opacity .2s}
+button:active{transform:scale(.88)}
+button:disabled{opacity:.6}
+.ancho{width:100%;margin-top:22px}
+.flecha{width:18px;height:18px;transition:transform .3s var(--rebote)}
+button:active .flecha{transform:translateX(6px)}
+.giro{width:18px;height:18px;border:2.5px solid var(--fondo);border-right-color:transparent;border-radius:50%;animation:gira .7s linear infinite}
+@keyframes gira{to{transform:rotate(360deg)}}
 
-  .tiktok{display:block;margin-top:22px;padding:16px;border:1px solid var(--borde);border-radius:12px;
-    color:var(--papel);text-decoration:none;text-align:center;font-weight:500}
-  .oculto{display:none}
+.check{width:64px;height:64px;color:var(--verde);margin-bottom:6px}
+.check circle{stroke-dasharray:166;stroke-dashoffset:166;animation:dibuja .6s ease forwards}
+.check path{stroke-dasharray:48;stroke-dashoffset:48;animation:dibuja .4s .5s ease forwards}
+@keyframes dibuja{to{stroke-dashoffset:0}}
+
+.aviso{color:var(--suave);margin:0}
+.cuenta{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:18px 0 6px}
+.cuenta div{text-align:center;overflow:hidden}
+.cuenta b{display:block;font-family:'Instrument Serif',serif;font-weight:400;font-size:3em;line-height:1.05}
+.cuenta b.cambia{animation:cae .45s var(--rebote)}
+@keyframes cae{from{transform:translateY(-60%);opacity:0}}
+.cuenta span{color:var(--suave);font-size:.8em}
+
+.tiktok{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:22px;padding:16px;border:1px solid var(--borde);border-radius:12px;color:var(--papel);text-decoration:none;font-weight:500;transition:transform .35s var(--rebote),border-color .3s}
+.tiktok:active{transform:scale(.94);border-color:var(--papel)}
+.oculto{display:none!important}
 </style>
 </head>
 <body>
 <main>
 
-  <!-- PANTALLA 1: enviar chisme -->
-  <section id="pantallaEnviar">
-    <span class="alaire"><i></i>AL AIRE PRONTO</span>
-    <h1>Contanos el chisme.</h1>
-    <p class="bajada">Anónimo de verdad. No pedimos nombre, ni mail, ni nada.</p>
-    <div class="tarjeta">
-      <textarea id="texto" maxlength="1000" placeholder="¿Qué pasó? Sin nombres reales, eh..."></textarea>
-      <div class="pie">
-        <span id="contador">0 / 1000</span>
-        <button id="btnEnviar" onclick="enviar()">Enviar</button>
-      </div>
+<section id="pantallaEnviar" class="entra">
+  <span class="alaire"><i></i>AL AIRE PRONTO</span>
+  <h1>Contanos el chisme.</h1>
+  <p class="bajada">Anónimo de verdad. No pedimos nombre, ni mail, ni nada.</p>
+  <div class="tarjeta" id="tarjeta">
+    <textarea id="texto" maxlength="1000" placeholder="¿Qué pasó? Sin nombres reales..."></textarea>
+    <div class="pie">
+      <span id="contador">0 / 1000</span>
+      <button id="btnEnviar" onclick="enviar()">Enviar <svg class="flecha" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- PANTALLA 2: después de enviar -->
-  <section id="pantallaGracias" class="oculto">
-    <span class="alaire"><i></i>RECIBIDO</span>
-    <h1>Tu chisme ya está en la fila.</h1>
-    <p class="bajada">Quizás lo escuches en el próximo vivo.</p>
-    <div class="tarjeta">
-      <p class="aviso" id="aviso"></p>
-      <div class="cuenta" id="cuenta"></div>
+<section id="pantallaGracias" class="oculto">
+  <svg class="check" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24"/><path d="M15 27l7 7 15-15"/></svg>
+  <h1>Tu chisme ya está en la fila.</h1>
+  <p class="bajada">Quizás lo escuches en el próximo vivo.</p>
+  <div class="tarjeta">
+    <p class="aviso" id="aviso"></p>
+    <div class="cuenta" id="cuenta">
+      <div><b id="d">0</b><span>días</span></div><div><b id="h">0</b><span>horas</span></div>
+      <div><b id="m">0</b><span>min</span></div><div><b id="s">0</b><span>seg</span></div>
     </div>
-    <a class="tiktok" id="linkTiktok" target="_blank">Seguinos en TikTok para no perdértelo</a>
-    <button class="ancho" onclick="otro()">Mandar otro chisme</button>
-  </section>
+  </div>
+  <a class="tiktok" id="linkTiktok" target="_blank">
+    <svg width="20" height="20" viewBox="0 0 24 24"><path d="M14 3v11.5a3.5 3.5 0 11-3.5-3.5"/><path d="M14 3c.5 2.8 2.5 4.5 5 4.8"/></svg>
+    Seguinos en TikTok para no perdértelo
+  </a>
+  <button class="ancho" onclick="otro()">Mandar otro chisme</button>
+</section>
 
 </main>
-
 <script>
-  // ====== CONFIGURACIÓN (cambiá solo esto) ======
-  const FECHA_VIVO = "2026-12-07T21:00:00-03:00";
-  const META = 1000;
-  const TIKTOK = "https://www.tiktok.com/";
-  // ===============================================
+// ====== CONFIGURACIÓN (cambiá solo esto) ======
+const FECHA_VIVO = "2026-12-07T21:00:00-03:00";
+const META = 1000;
+const TIKTOK = "https://www.tiktok.com/";
+// ===============================================
 
-  const db = window.supabase.createClient(
-    "https://lfwoxdphbowfriqdrezl.supabase.co",
-    "sb_publishable_rXxD1ZlBPunQ1YGHhXp93w_5cnA-4Tn"
-  );
+const db=window.supabase.createClient("https://lfwoxdphbowfriqdrezl.supabase.co","sb_publishable_rXxD1ZlBPunQ1YGHhXp93w_5cnA-4Tn");
+const $=id=>document.getElementById(id);
+const FLECHA='Enviar <svg class="flecha" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
 
-  const $ = id => document.getElementById(id);
-  $("linkTiktok").href = TIKTOK;
-  $("texto").addEventListener("input", e => $("contador").innerText = e.target.value.length + " / 1000");
+$("linkTiktok").href=TIKTOK;
+$("texto").addEventListener("focus",()=>$("tarjeta").classList.add("foco"));
+$("texto").addEventListener("blur",()=>$("tarjeta").classList.remove("foco"));
+$("texto").addEventListener("input",e=>{
+  const n=e.target.value.length;
+  $("contador").textContent=n+" / 1000";
+  $("contador").classList.toggle("cerca",n>900);
+});
 
-  const fecha = new Date(FECHA_VIVO);
-  const dia = fecha.toLocaleDateString("es-AR",{weekday:"long",day:"numeric",month:"long"});
-  const hora = fecha.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"});
-  $("aviso").innerText = `Si llegamos a ${META} seguidores, salimos en vivo el ${dia} a las ${hora}.`;
+const fecha=new Date(FECHA_VIVO);
+const dia=fecha.toLocaleDateString("es-AR",{weekday:"long",day:"numeric",month:"long"});
+const hora=fecha.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"});
+$("aviso").textContent=`Si llegamos a ${META} seguidores, salimos en vivo el ${dia} a las ${hora}.`;
 
-  function actualizarCuenta(){
-    const resta = fecha - new Date();
-    if(resta <= 0){ $("cuenta").innerHTML = "<div style='grid-column:span 4'><b>¡En vivo!</b></div>"; return; }
-    const d = Math.floor(resta/86400000), h = Math.floor(resta/3600000)%24,
-          m = Math.floor(resta/60000)%60, s = Math.floor(resta/1000)%60;
-    $("cuenta").innerHTML =
-      `<div><b>${d}</b><span>días</span></div><div><b>${h}</b><span>horas</span></div>
-       <div><b>${m}</b><span>min</span></div><div><b>${s}</b><span>seg</span></div>`;
-  }
-  setInterval(actualizarCuenta,1000); actualizarCuenta();
+function poner(id,valor){
+  const el=$(id);
+  if(el.textContent!==String(valor)){el.textContent=valor;el.classList.remove("cambia");void el.offsetWidth;el.classList.add("cambia");}
+}
+function actualizarCuenta(){
+  const resta=fecha-new Date();
+  if(resta<=0){$("cuenta").innerHTML="<div style='grid-column:span 4'><b>En vivo</b></div>";return;}
+  poner("d",Math.floor(resta/86400000));poner("h",Math.floor(resta/3600000)%24);
+  poner("m",Math.floor(resta/60000)%60);poner("s",Math.floor(resta/1000)%60);
+}
+setInterval(actualizarCuenta,1000);actualizarCuenta();
 
-  async function enviar(){
-    const texto = $("texto").value.trim();
-    if(!texto){ alert("Escribí tu chisme primero"); return; }
-    $("btnEnviar").disabled = true; $("btnEnviar").innerText = "Enviando...";
-    const { error } = await db.from("chismes").insert({ texto });
-    $("btnEnviar").disabled = false; $("btnEnviar").innerText = "Enviar";
-    if(error){ alert("Hubo un error: " + error.message); return; }
-    $("pantallaEnviar").classList.add("oculto");
-    $("pantallaGracias").classList.remove("oculto");
+function cambiarPantalla(de,a){
+  $(de).classList.add("sale");
+  setTimeout(()=>{
+    $(de).classList.add("oculto");$(de).classList.remove("sale","entra");
+    $(a).classList.remove("oculto");void $(a).offsetWidth;$(a).classList.add("entra");
     window.scrollTo(0,0);
-  }
+  },330);
+}
 
-  function otro(){
-    $("texto").value = ""; $("contador").innerText = "0 / 1000";
-    $("pantallaGracias").classList.add("oculto");
-    $("pantallaEnviar").classList.remove("oculto");
-    window.scrollTo(0,0);
+async function enviar(){
+  const texto=$("texto").value.trim();
+  if(!texto){$("tarjeta").classList.remove("temblor");void $("tarjeta").offsetWidth;$("tarjeta").classList.add("temblor");return;}
+  const b=$("btnEnviar");b.disabled=true;b.innerHTML='<span class="giro"></span>';
+  const {error}=await db.from("chismes").insert({texto});
+  b.disabled=false;b.innerHTML=FLECHA;
+  if(error){
+    const msg=error.message.includes("Demasiados")?"Mandaste muchos seguidos. Esperá un minuto.":"Hubo un error, probá de nuevo.";
+    alert(msg);return;
   }
+  cambiarPantalla("pantallaEnviar","pantallaGracias");
+}
+
+function otro(){
+  $("texto").value="";$("contador").textContent="0 / 1000";$("contador").classList.remove("cerca");
+  cambiarPantalla("pantallaGracias","pantallaEnviar");
+}
 </script>
 </body>
 </html>
