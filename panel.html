@@ -6,26 +6,88 @@
 <title>Panel</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-  :root{--fondo:#0f0e0c;--papel:#efe9dc;--suave:#a39d90;--rojo:#e5402a;
-    --vidrio:rgba(239,233,220,.06);--borde:rgba(239,233,220,.14)}
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--fondo);color:var(--papel);font-family:'Inter',sans-serif;padding:20px 14px 60px}
-  main{max-width:600px;margin:0 auto}
-  h1{font-size:1.4em;margin:0}
-  input{width:100%;padding:14px;margin-top:10px;border-radius:12px;border:1px solid var(--borde);
-    background:var(--vidrio);color:var(--papel);font-size:1em;font-family:inherit}
-  button{border:none;border-radius:12px;padding:12px 16px;font-family:inherit;font-weight:700;font-size:.95em;cursor:pointer}
-  .claro{background:var(--papel);color:var(--fondo)}
-  .borde{background:transparent;color:var(--papel);border:1px solid var(--borde)}
-  .peligro{background:transparent;color:var(--rojo);border:1px solid var(--rojo)}
-  .arriba{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
-  .pestanas{display:flex;gap:8px;margin-bottom:16px}
-  .pestanas button.activa{background:var(--papel);color:var(--fondo)}
-  .chisme{background:var(--vidrio);border:1px solid var(--borde);border-radius:18px;padding:18px;margin-bottom:14px}
-  .chisme.leido{opacity:.5}
-  .hora{color:var(--suave);font-size:.8em;margin-bottom:8px}
-  .texto{font-size:1.35em;line-height:1.45;white-space:pre-wrap;word-wrap:break-word}
-  .acciones{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
-  .
+:root{--fondo:#0f0e0c;--papel:#efe9dc;--suave:#a39d90;--rojo:#e5402a;--vidrio:rgba(239,233,220,.06);--borde:rgba(239,233,220,.14)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--papel);font-family:system-ui,sans-serif;padding:20px 14px 60px}
+main{max-width:600px;margin:0 auto}
+h1{font-size:1.4em;margin:0}
+input{width:100%;padding:14px;margin-top:10px;border-radius:12px;border:1px solid var(--borde);background:var(--vidrio);color:var(--papel);font-size:16px}
+button{border:none;border-radius:12px;padding:12px 14px;font-weight:700;font-size:15px}
+.claro{background:var(--papel);color:var(--fondo)}
+.borde{background:transparent;color:var(--papel);border:1px solid var(--borde)}
+.peligro{background:transparent;color:var(--rojo);border:1px solid var(--rojo)}
+.arriba{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.pestanas{display:flex;gap:8px;margin-bottom:16px}
+.pestanas button{flex:1}
+.activa{background:var(--papel)!important;color:var(--fondo)!important}
+.chisme{background:var(--vidrio);border:1px solid var(--borde);border-radius:18px;padding:18px;margin-bottom:14px}
+.hora{color:var(--suave);font-size:.8em;margin-bottom:8px}
+.texto{font-size:1.35em;line-height:1.45;white-space:pre-wrap;word-wrap:break-word}
+.acciones{display:flex;gap:8px;margin-top:14px}
+.acciones button{flex:1}
+.vacio{color:var(--suave);text-align:center;margin-top:40px}
+.oculto{display:none}
+</style>
+</head>
+<body>
+<main>
+<section id="login">
+<h1>Panel privado</h1>
+<input id="email" type="email" placeholder="Tu email">
+<input id="pass" type="password" placeholder="Tu contraseña">
+<button class="claro" style="width:100%;margin-top:14px" onclick="entrar()">Entrar</button>
+</section>
+<section id="panel" class="oculto">
+<div class="arriba"><h1 id="titulo">Chismes</h1><button class="borde" onclick="salir()">Salir</button></div>
+<div class="pestanas">
+<button id="tabPend" class="borde activa" onclick="filtro(false)">Pendientes</button>
+<button id="tabLeid" class="borde" onclick="filtro(true)">Leídos</button>
+</div>
+<div id="lista"></div>
+</section>
+</main>
+<script>
+const db=window.supabase.createClient("https://lfwoxdphbowfriqdrezl.supabase.co","sb_publishable_rXxD1ZlBPunQ1YGHhXp93w_5cnA-4Tn");
+const $=id=>document.getElementById(id);
+let verLeidos=false,timer=null;
+
+async function entrar(){
+  const {error}=await db.auth.signInWithPassword({email:$("email").value.trim(),password:$("pass").value});
+  if(error){alert("No se pudo entrar: "+error.message);return;}
+  mostrarPanel();
+}
+async function salir(){await db.auth.signOut();location.reload();}
+function mostrarPanel(){
+  $("login").classList.add("oculto");$("panel").classList.remove("oculto");
+  cargar();if(!timer)timer=setInterval(cargar,15000);
+}
+function filtro(v){
+  verLeidos=v;$("tabPend").classList.toggle("activa",!v);$("tabLeid").classList.toggle("activa",v);cargar();
+}
+async function cargar(){
+  const {data,error}=await db.from("chismes").select("*").eq("leido",verLeidos).order("created_at",{ascending:true});
+  if(error){$("lista").innerHTML='<p class="vacio">Error: '+error.message+'</p>';return;}
+  if(!data.length){$("lista").innerHTML='<p class="vacio">No hay nada por acá.</p>';return;}
+  $("lista").innerHTML="";
+  data.forEach(c=>{
+    const d=document.createElement("div");d.className="chisme";
+    const h=new Date(c.created_at).toLocaleString("es-AR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
+    d.innerHTML='<div class="hora">'+h+'</div><div class="texto"></div><div class="acciones"><button class="claro">'+(c.leido?"Volver":"Leído")+'</button><button class="borde">Copiar</button><button class="peligro">Descartar</button></div>';
+    d.querySelector(".texto").textContent=c.texto;
+    const [b1,b2,b3]=d.querySelectorAll("button");
+    b1.onclick=()=>marcar(c.id,!c.leido);
+    b2.onclick=()=>{navigator.clipboard.writeText(c.texto);b2.textContent="¡Copiado!";};
+    b3.onclick=()=>borrar(c.id);
+    $("lista").appendChild(d);
+  });
+}
+async function marcar(id,v){await db.from("chismes").update({leido:v}).eq("id",id);cargar();}
+async function borrar(id){
+  if(!confirm("¿Borrar este chisme para siempre?"))return;
+  await db.from("chismes").delete().eq("id",id);cargar();
+}
+db.auth.getSession().then(({data})=>{if(data.session)mostrarPanel();});
+</script>
+</body>
+</html>
