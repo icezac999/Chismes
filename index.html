@@ -5,46 +5,70 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mandá tu chisme 🤫</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
-  body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(135deg,#1a0033,#4b0082);color:#fff;min-height:100vh;display:flex;justify-content:center;align-items:center}
-  .caja{width:90%;max-width:500px;text-align:center;padding:20px}
-  h1{font-size:2.2em;margin-bottom:5px}
-  textarea{width:100%;height:160px;border-radius:12px;border:none;padding:12px;font-size:1.1em;box-sizing:border-box}
-  button,.tiktok{display:inline-block;margin-top:15px;padding:14px 28px;border:none;border-radius:30px;font-size:1.1em;font-weight:bold;cursor:pointer;text-decoration:none}
-  button{background:#ff2e93;color:#fff}
-  .tiktok{background:#000;color:#fff;border:2px solid #25f4ee}
-  .aviso{margin-top:25px;font-size:1.1em}
-  .cuenta{font-size:2.5em;font-weight:bold;margin:10px 0;color:#25f4ee}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;font-family:'Inter',sans-serif;color:#fff;
+    background:#05010f;display:flex;justify-content:center;align-items:center;overflow-x:hidden}
+  /* Manchas de color flotando detrás del vidrio */
+  .blob{position:fixed;border-radius:50%;filter:blur(80px);opacity:.55;z-index:0;animation:flotar 18s ease-in-out infinite}
+  .b1{width:380px;height:380px;background:#7b2ff7;top:-80px;left:-100px}
+  .b2{width:320px;height:320px;background:#00e5ff;bottom:-80px;right:-80px;animation-delay:-6s}
+  .b3{width:260px;height:260px;background:#ff2e93;top:40%;left:55%;animation-delay:-12s}
+  @keyframes flotar{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,-50px) scale(1.15)}}
+
+  .vidrio{position:relative;z-index:1;width:90%;max-width:480px;padding:32px 24px;text-align:center;
+    background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:28px;
+    backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);
+    box-shadow:0 8px 40px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.25)}
+  h1{font-family:'Orbitron',sans-serif;font-size:1.8em;margin:0 0 8px;letter-spacing:2px;
+    background:linear-gradient(90deg,#00e5ff,#ff2e93);-webkit-background-clip:text;color:transparent}
+  p{opacity:.8;margin:0 0 18px}
+  textarea{width:100%;height:150px;padding:14px;font-size:1em;color:#fff;font-family:inherit;resize:none;
+    background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2);border-radius:18px;outline:none}
+  textarea::placeholder{color:rgba(255,255,255,.5)}
+  textarea:focus{border-color:#00e5ff;box-shadow:0 0 18px rgba(0,229,255,.35)}
+  button,.tiktok{display:inline-block;margin-top:16px;padding:14px 30px;border-radius:40px;font-size:1em;
+    font-weight:600;cursor:pointer;text-decoration:none;color:#fff;transition:.25s;
+    background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);backdrop-filter:blur(10px)}
+  button:hover,.tiktok:hover{background:rgba(255,255,255,.22);box-shadow:0 0 22px rgba(255,46,147,.5)}
+  .principal{background:linear-gradient(135deg,rgba(123,47,247,.7),rgba(255,46,147,.7))}
+  .aviso{margin-top:26px;font-size:.95em;opacity:.85}
+  .cuenta{display:flex;justify-content:center;gap:10px;margin:14px 0}
+  .cuenta div{min-width:64px;padding:10px 6px;border-radius:16px;background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.15)}
+  .cuenta b{display:block;font-family:'Orbitron',sans-serif;font-size:1.6em;color:#00e5ff;text-shadow:0 0 12px #00e5ff}
+  .cuenta span{font-size:.7em;opacity:.7}
   .oculto{display:none}
 </style>
 </head>
 <body>
-<div class="caja">
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
 
+<div class="vidrio">
   <div id="formulario">
-    <h1>🤫 Mandá tu chisme</h1>
+    <h1>🤫 CHISMES</h1>
     <p>100% anónimo. Nadie sabe quién lo mandó.</p>
     <textarea id="texto" placeholder="Contá tu chisme acá..."></textarea>
-    <button onclick="enviar()">Enviar chisme</button>
+    <button class="principal" onclick="enviar()">Enviar chisme</button>
   </div>
 
   <div id="gracias" class="oculto">
-    <h1>✅ ¡Chisme recibido!</h1>
-    <p>Quizás lo escuches en el próximo vivo 👀</p>
-    <button onclick="otro()">Mandar otro chisme</button>
+    <h1>✅ RECIBIDO</h1>
+    <p>¿Saldrá al aire? Seguinos para enterarte 👀</p>
+    <button class="principal" onclick="otro()">Mandar otro chisme</button>
   </div>
 
   <div class="aviso" id="aviso"></div>
   <div class="cuenta" id="cuenta"></div>
   <a class="tiktok" id="linkTiktok" target="_blank">Seguinos en TikTok</a>
-
 </div>
 
 <script>
   // ====== CONFIGURACIÓN (cambiá solo esto) ======
-  const FECHA_VIVO = "2026-12-07T21:00:00-03:00"; // fecha y hora del vivo
-  const META = 1000;                              // seguidores a alcanzar
-  const TIKTOK = "https://www.tiktok.com/";       // link de tu perfil
+  const FECHA_VIVO = "2026-12-07T21:00:00-03:00";
+  const META = 1000;
+  const TIKTOK = "https://www.tiktok.com/";
   // ===============================================
 
   const supabase = window.supabase.createClient(
@@ -61,12 +85,12 @@
 
   function actualizarCuenta(){
     const resta = fecha - new Date();
-    if(resta <= 0){ document.getElementById("cuenta").innerText = "¡Estamos en vivo!"; return; }
-    const d = Math.floor(resta/86400000);
-    const h = Math.floor(resta/3600000)%24;
-    const m = Math.floor(resta/60000)%60;
-    const s = Math.floor(resta/1000)%60;
-    document.getElementById("cuenta").innerText = `${d}d ${h}h ${m}m ${s}s`;
+    const c = document.getElementById("cuenta");
+    if(resta <= 0){ c.innerHTML = "<b>¡EN VIVO!</b>"; return; }
+    const d = Math.floor(resta/86400000), h = Math.floor(resta/3600000)%24,
+          m = Math.floor(resta/60000)%60, s = Math.floor(resta/1000)%60;
+    c.innerHTML = `<div><b>${d}</b><span>días</span></div><div><b>${h}</b><span>horas</span></div>
+                   <div><b>${m}</b><span>min</span></div><div><b>${s}</b><span>seg</span></div>`;
   }
   setInterval(actualizarCuenta,1000); actualizarCuenta();
 
@@ -87,3 +111,4 @@
 </script>
 </body>
 </html>
+
