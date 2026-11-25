@@ -2,92 +2,169 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Panel</title>
 <meta name="robots" content="noindex">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--fondo:#0f0e0c;--papel:#efe9dc;--suave:#a39d90;--rojo:#e5402a;--vidrio:rgba(239,233,220,.06);--borde:rgba(239,233,220,.14)}
-*{box-sizing:border-box}
-body{margin:0;background:var(--fondo);color:var(--papel);font-family:system-ui,sans-serif;padding:20px 14px 60px}
+:root{--fondo:#0f0e0c;--papel:#efe9dc;--suave:#a39d90;--rojo:#e5402a;--verde:#4caf72;--borde:rgba(239,233,220,.14);--rebote:cubic-bezier(.34,1.56,.64,1)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--fondo);color:var(--papel);font-family:system-ui,sans-serif;padding:calc(env(safe-area-inset-top) + 20px) 14px 90px;overflow-x:hidden}
 main{max-width:600px;margin:0 auto}
 h1{font-size:1.4em;margin:0}
-input{width:100%;padding:14px;margin-top:10px;border-radius:12px;border:1px solid var(--borde);background:var(--vidrio);color:var(--papel);font-size:16px}
-button{border:none;border-radius:12px;padding:12px 14px;font-weight:700;font-size:15px}
+input{width:100%;padding:14px;margin-top:10px;border-radius:12px;border:1px solid var(--borde);background:rgba(239,233,220,.06);color:var(--papel);font-size:16px;transition:border-color .2s,transform .2s}
+input:focus{outline:none;border-color:var(--papel);transform:scale(1.02)}
+button{border:none;border-radius:12px;padding:12px 14px;font-weight:700;font-size:15px;transition:transform .35s var(--rebote),background .2s,color .2s}
+button:active{transform:scale(.88)}
 .claro{background:var(--papel);color:var(--fondo)}
 .borde{background:transparent;color:var(--papel);border:1px solid var(--borde)}
-.peligro{background:transparent;color:var(--rojo);border:1px solid var(--rojo)}
-.arriba{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
-.pestanas{display:flex;gap:8px;margin-bottom:16px}
-.pestanas button{flex:1}
-.activa{background:var(--papel)!important;color:var(--fondo)!important}
-.chisme{background:var(--vidrio);border:1px solid var(--borde);border-radius:18px;padding:18px;margin-bottom:14px}
+.arriba{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.num{display:inline-block;min-width:1.6em;padding:2px 8px;margin-left:6px;border-radius:20px;background:var(--rojo);color:#fff;font-size:.75em;text-align:center}
+.salta{animation:salta .5s var(--rebote)}
+@keyframes salta{40%{transform:scale(1.5)}}
+.ayuda{color:var(--suave);font-size:.85em;margin:0 0 14px}
+.pestanas{position:relative;display:flex;margin-bottom:18px;border:1px solid var(--borde);border-radius:14px;padding:4px}
+.pestanas button{flex:1;position:relative;z-index:1;background:transparent;color:var(--suave)}
+.pestanas button.activa{color:var(--fondo)}
+.pildora{position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);background:var(--papel);border-radius:10px;transition:transform .45s var(--rebote)}
+.pestanas.der .pildora{transform:translateX(100%)}
+.fila{position:relative;margin-bottom:14px;border-radius:18px;overflow:hidden;animation:entra .55s var(--rebote) both;transition:height .3s,margin .3s,opacity .3s}
+@keyframes entra{from{opacity:0;transform:translateY(30px) scale(.92)}}
+.fondoIzq,.fondoDer{position:absolute;inset:0;display:flex;align-items:center;padding:0 24px;font-weight:800;font-size:1.1em;opacity:0}
+.fondoIzq{background:var(--verde);justify-content:flex-end}
+.fondoDer{background:var(--rojo);justify-content:flex-start}
+.icono{display:inline-block;transition:transform .2s var(--rebote)}
+.chisme{position:relative;background:#1a1916;border:1px solid var(--borde);border-radius:18px;padding:18px;touch-action:pan-y;user-select:none;-webkit-user-select:none}
 .hora{color:var(--suave);font-size:.8em;margin-bottom:8px}
 .texto{font-size:1.35em;line-height:1.45;white-space:pre-wrap;word-wrap:break-word}
-.acciones{display:flex;gap:8px;margin-top:14px}
-.acciones button{flex:1}
-.vacio{color:var(--suave);text-align:center;margin-top:40px}
-.oculto{display:none}
+.copiar{margin-top:14px;width:100%}
+.copiado{background:var(--verde)!important;color:#fff!important;border-color:var(--verde)!important;animation:salta .5s var(--rebote)}
+.vacio{color:var(--suave);text-align:center;margin-top:50px;animation:entra .6s var(--rebote)}
+.vacio b{display:block;font-size:2.5em;animation:flota 2.5s ease-in-out infinite}
+@keyframes flota{50%{transform:translateY(-10px)}}
+.oculto{display:none!important}
+.pantalla{animation:entra .5s var(--rebote)}
+.temblor{animation:temblor .4s}
+@keyframes temblor{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 20px);transform:translate(-50%,150%);background:var(--papel);color:var(--fondo);padding:12px 16px;border-radius:14px;display:flex;gap:14px;align-items:center;font-weight:600;transition:transform .45s var(--rebote);overflow:hidden}
+#toast.ver{transform:translate(-50%,0)}
+#toast button{background:var(--fondo);color:var(--papel);padding:8px 12px}
+#barra{position:absolute;left:0;bottom:0;height:3px;background:var(--rojo);width:100%}
+#toast.ver #barra{animation:baja 5s linear forwards}
+@keyframes baja{to{width:0}}
 </style>
 </head>
 <body>
 <main>
-<section id="login">
+<section id="login" class="pantalla">
 <h1>Panel privado</h1>
 <input id="email" type="email" placeholder="Tu email">
 <input id="pass" type="password" placeholder="Tu contraseña">
-<button class="claro" style="width:100%;margin-top:14px" onclick="entrar()">Entrar</button>
+<button id="btnEntrar" class="claro" style="width:100%;margin-top:14px" onclick="entrar()">Entrar</button>
 </section>
 <section id="panel" class="oculto">
-<div class="arriba"><h1 id="titulo">Chismes</h1><button class="borde" onclick="salir()">Salir</button></div>
-<div class="pestanas">
-<button id="tabPend" class="borde activa" onclick="filtro(false)">Pendientes</button>
-<button id="tabLeid" class="borde" onclick="filtro(true)">Leídos</button>
+<div class="arriba"><h1><span id="titulo">Chismes</span><span id="num" class="num">0</span></h1><button class="borde" onclick="salir()">Salir</button></div>
+<p class="ayuda" id="ayuda">← Izquierda: leído · Derecha: descartar →</p>
+<div class="pestanas" id="pestanas"><div class="pildora"></div>
+<button id="tabPend" class="activa" onclick="filtro(false)">Pendientes</button>
+<button id="tabLeid" onclick="filtro(true)">Leídos</button>
 </div>
 <div id="lista"></div>
 </section>
 </main>
+<div id="toast"><span>Chisme descartado</span><button onclick="deshacer()">Deshacer</button><div id="barra"></div></div>
 <script>
 const db=window.supabase.createClient("https://lfwoxdphbowfriqdrezl.supabase.co","sb_publishable_rXxD1ZlBPunQ1YGHhXp93w_5cnA-4Tn");
 const $=id=>document.getElementById(id);
-let verLeidos=false,timer=null;
+let verLeidos=false,timer=null,pendienteBorrar=null,ultimoNum=-1,idsVistos="";
+
+function rebotar(el,clase){el.classList.remove(clase);void el.offsetWidth;el.classList.add(clase);}
 
 async function entrar(){
+  const b=$("btnEntrar");b.textContent="Entrando...";
   const {error}=await db.auth.signInWithPassword({email:$("email").value.trim(),password:$("pass").value});
-  if(error){alert("No se pudo entrar: "+error.message);return;}
+  b.textContent="Entrar";
+  if(error){rebotar($("login"),"temblor");return;}
   mostrarPanel();
 }
 async function salir(){await db.auth.signOut();location.reload();}
 function mostrarPanel(){
-  $("login").classList.add("oculto");$("panel").classList.remove("oculto");
-  cargar();if(!timer)timer=setInterval(cargar,15000);
+  $("login").classList.add("oculto");$("panel").classList.remove("oculto");$("panel").classList.add("pantalla");
+  cargar(true);if(!timer)timer=setInterval(()=>cargar(false),15000);
 }
 function filtro(v){
-  verLeidos=v;$("tabPend").classList.toggle("activa",!v);$("tabLeid").classList.toggle("activa",v);cargar();
+  verLeidos=v;
+  $("pestanas").classList.toggle("der",v);
+  $("tabPend").classList.toggle("activa",!v);$("tabLeid").classList.toggle("activa",v);
+  $("ayuda").textContent=v?"← Izquierda: volver a pendientes · Derecha: descartar →":"← Izquierda: leído · Derecha: descartar →";
+  cargar(true);
 }
-async function cargar(){
+async function cargar(animar){
   const {data,error}=await db.from("chismes").select("*").eq("leido",verLeidos).order("created_at",{ascending:true});
   if(error){$("lista").innerHTML='<p class="vacio">Error: '+error.message+'</p>';return;}
-  if(!data.length){$("lista").innerHTML='<p class="vacio">No hay nada por acá.</p>';return;}
+  const visibles=data.filter(c=>!pendienteBorrar||c.id!==pendienteBorrar.id);
+  $("titulo").textContent=verLeidos?"Leídos":"Chismes";
+  if(visibles.length!==ultimoNum){$("num").textContent=visibles.length;rebotar($("num"),"salta");ultimoNum=visibles.length;}
+  const ids=visibles.map(c=>c.id).join(",");
+  if(!animar&&ids===idsVistos)return;
+  idsVistos=ids;
+  if(!visibles.length){$("lista").innerHTML='<p class="vacio"><b>🤫</b>No hay nada por acá.</p>';return;}
   $("lista").innerHTML="";
-  data.forEach(c=>{
-    const d=document.createElement("div");d.className="chisme";
-    const h=new Date(c.created_at).toLocaleString("es-AR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
-    d.innerHTML='<div class="hora">'+h+'</div><div class="texto"></div><div class="acciones"><button class="claro">'+(c.leido?"Volver":"Leído")+'</button><button class="borde">Copiar</button><button class="peligro">Descartar</button></div>';
-    d.querySelector(".texto").textContent=c.texto;
-    const [b1,b2,b3]=d.querySelectorAll("button");
-    b1.onclick=()=>marcar(c.id,!c.leido);
-    b2.onclick=()=>{navigator.clipboard.writeText(c.texto);b2.textContent="¡Copiado!";};
-    b3.onclick=()=>borrar(c.id);
-    $("lista").appendChild(d);
-  });
+  visibles.forEach((c,i)=>{const f=crearFila(c);f.style.animationDelay=(i*70)+"ms";$("lista").appendChild(f);});
 }
-async function marcar(id,v){await db.from("chismes").update({leido:v}).eq("id",id);cargar();}
-async function borrar(id){
-  if(!confirm("¿Borrar este chisme para siempre?"))return;
-  await db.from("chismes").delete().eq("id",id);cargar();
+function crearFila(c){
+  const fila=document.createElement("div");fila.className="fila";
+  const h=new Date(c.created_at).toLocaleString("es-AR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
+  fila.innerHTML='<div class="fondoIzq"><span class="icono">'+(c.leido?"↩ Pendiente":"✓ Leído")+'</span></div><div class="fondoDer"><span class="icono">✕ Descartar</span></div><div class="chisme"><div class="hora">'+h+'</div><div class="texto"></div><button class="borde copiar">Copiar</button></div>';
+  fila.querySelector(".texto").textContent=c.texto;
+  const card=fila.querySelector(".chisme"),izq=fila.querySelector(".fondoIzq"),der=fila.querySelector(".fondoDer");
+  const iIzq=izq.querySelector(".icono"),iDer=der.querySelector(".icono");
+  const bc=fila.querySelector(".copiar");
+  bc.onclick=()=>{navigator.clipboard.writeText(c.texto);bc.textContent="¡Copiado! ✓";rebotar(bc,"copiado");setTimeout(()=>{bc.textContent="Copiar";bc.classList.remove("copiado");},1500);};
+  let x0=0,y0=0,dx=0,arrastrando=false,decidido=false;
+  card.addEventListener("touchstart",e=>{x0=e.touches[0].clientX;y0=e.touches[0].clientY;dx=0;arrastrando=true;decidido=false;card.style.transition="none";},{passive:true});
+  card.addEventListener("touchmove",e=>{
+    if(!arrastrando)return;
+    const mx=e.touches[0].clientX-x0,my=e.touches[0].clientY-y0;
+    if(!decidido){if(Math.abs(my)>Math.abs(mx)){arrastrando=false;return;}decidido=true;}
+    dx=mx;const lim=card.offsetWidth*0.35;
+    card.style.transform="translateX("+dx+"px) rotate("+(dx/25)+"deg)";
+    izq.style.opacity=dx<0?Math.min(1,-dx/100):0;der.style.opacity=dx>0?Math.min(1,dx/100):0;
+    iIzq.style.transform=dx<-lim?"scale(1.35)":"scale(1)";iDer.style.transform=dx>lim?"scale(1.35)":"scale(1)";
+  },{passive:true});
+  card.addEventListener("touchend",()=>{
+    if(!decidido)return;arrastrando=false;
+    card.style.transition="transform .4s var(--rebote)";
+    const lim=card.offsetWidth*0.35;
+    if(dx<-lim){card.style.transform="translateX(-120%) rotate(-12deg)";cerrar(fila,()=>marcar(c.id,!c.leido));}
+    else if(dx>lim){card.style.transform="translateX(120%) rotate(12deg)";cerrar(fila,()=>descartar(c));}
+    else{card.style.transform="translateX(0) rotate(0)";izq.style.opacity=0;der.style.opacity=0;}
+  });
+  return fila;
+}
+function cerrar(fila,accion){
+  setTimeout(()=>{fila.style.animation="none";fila.style.height=fila.offsetHeight+"px";requestAnimationFrame(()=>{fila.style.height="0";fila.style.marginBottom="0";fila.style.opacity="0";});setTimeout(()=>{fila.remove();accion();},300);},250);
+}
+async function marcar(id,v){await db.from("chismes").update({leido:v}).eq("id",id);idsVistos="";cargar(false);}
+function descartar(c){
+  if(pendienteBorrar)borrarYa();
+  pendienteBorrar={id:c.id,t:setTimeout(borrarYa,5000)};
+  const t=$("toast");t.classList.remove("ver");void t.offsetWidth;t.classList.add("ver");
+  idsVistos="";cargar(false);
+}
+async function borrarYa(){
+  if(!pendienteBorrar)return;
+  const id=pendienteBorrar.id;clearTimeout(pendienteBorrar.t);pendienteBorrar=null;
+  $("toast").classList.remove("ver");
+  await db.from("chismes").delete().eq("id",id);idsVistos="";cargar(false);
+}
+function deshacer(){
+  if(!pendienteBorrar)return;
+  clearTimeout(pendienteBorrar.t);pendienteBorrar=null;
+  $("toast").classList.remove("ver");cargar(true);
 }
 db.auth.getSession().then(({data})=>{if(data.session)mostrarPanel();});
 </script>
 </body>
+</html>
 </html>
