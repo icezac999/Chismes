@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel</title>
+<meta name="robots" content="noindex">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--fondo:#0f0e0c;--papel:#efe9dc;--suave:#a39d90;--rojo:#e5402a;
+    --vidrio:rgba(239,233,220,.06);--borde:rgba(239,233,220,.14)}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fondo);color:var(--papel);font-family:'Inter',sans-serif;padding:20px 14px 60px}
+  main{max-width:600px;margin:0 auto}
+  h1{font-size:1.4em;margin:0}
+  input{width:100%;padding:14px;margin-top:10px;border-radius:12px;border:1px solid var(--borde);
+    background:var(--vidrio);color:var(--papel);font-size:1em;font-family:inherit}
+  button{border:none;border-radius:12px;padding:12px 16px;font-family:inherit;font-weight:700;font-size:.95em;cursor:pointer}
+  .claro{background:var(--papel);color:var(--fondo)}
+  .borde{background:transparent;color:var(--papel);border:1px solid var(--borde)}
+  .peligro{background:transparent;color:var(--rojo);border:1px solid var(--rojo)}
+  .arriba{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+  .pestanas{display:flex;gap:8px;margin-bottom:16px}
+  .pestanas button.activa{background:var(--papel);color:var(--fondo)}
+  .chisme{background:var(--vidrio);border:1px solid var(--borde);border-radius:18px;padding:18px;margin-bottom:14px}
+  .chisme.leido{opacity:.5}
+  .hora{color:var(--suave);font-size:.8em;margin-bottom:8px}
+  .texto{font-size:1.35em;line-height:1.45;white-space:pre-wrap;word-wrap:break-word}
+  .acciones{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+  .
