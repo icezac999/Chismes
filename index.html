@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mandá tu chisme 🤫</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(135deg,#1a0033,#4b0082);color:#fff;min-height:100vh;display:flex;justify-content:center;align-items:center}
+  .caja{width:90%;max-width:500px;text-align:center;padding:20px}
+  h1{font-size:2.2em;margin-bottom:5px}
+  textarea{width:100%;height:160px;border-radius:12px;border:none;padding:12px;font-size:1.1em;box-sizing:border-box}
+  button,.tiktok{display:inline-block;margin-top:15px;padding:14px 28px;border:none;border-radius:30px;font-size:1.1em;font-weight:bold;cursor:pointer;text-decoration:none}
+  button{background:#ff2e93;color:#fff}
+  .tiktok{background:#000;color:#fff;border:2px solid #25f4ee}
+  .aviso{margin-top:25px;font-size:1.1em}
+  .cuenta{font-size:2.5em;font-weight:bold;margin:10px 0;color:#25f4ee}
+  .oculto{display:none}
+</style>
+</head>
+<body>
+<div class="caja">
+
+  <div id="formulario">
+    <h1>🤫 Mandá tu chisme</h1>
+    <p>100% anónimo. Nadie sabe quién lo mandó.</p>
+    <textarea id="texto" placeholder="Contá tu chisme acá..."></textarea>
+    <button onclick="enviar()">Enviar chisme</button>
+  </div>
+
+  <div id="gracias" class="oculto">
+    <h1>✅ ¡Chisme recibido!</h1>
+    <p>Quizás lo escuches en el próximo vivo 👀</p>
+    <button onclick="otro()">Mandar otro chisme</button>
+  </div>
+
+  <div class="aviso" id="aviso"></div>
+  <div class="cuenta" id="cuenta"></div>
+  <a class="tiktok" id="linkTiktok" target="_blank">Seguinos en TikTok</a>
+
+</div>
+
+<script>
+  // ====== CONFIGURACIÓN (cambiá solo esto) ======
+  const FECHA_VIVO = "2026-12-07T21:00:00-03:00"; // fecha y hora del vivo
+  const META = 1000;                              // seguidores a alcanzar
+  const TIKTOK = "https://www.tiktok.com/";       // link de tu perfil
+  // ===============================================
+
+  const supabase = window.supabase.createClient(
+    "https://lfwoxdphbowfriqdrezl.supabase.co",
+    "sb_publishable_rXxD1ZlBPunQ1YGHhXp93w_5cnA-4Tn"
+  );
+
+  document.getElementById("linkTiktok").href = TIKTOK;
+  const fecha = new Date(FECHA_VIVO);
+  const dia = fecha.toLocaleDateString("es-AR",{weekday:"long",day:"numeric",month:"long"});
+  const hora = fecha.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"});
+  document.getElementById("aviso").innerText =
+    `Si llegamos a ${META} seguidores, el ${dia} a las ${hora} hacemos el vivo 🔥`;
+
+  function actualizarCuenta(){
+    const resta = fecha - new Date();
+    if(resta <= 0){ document.getElementById("cuenta").innerText = "¡Estamos en vivo!"; return; }
+    const d = Math.floor(resta/86400000);
+    const h = Math.floor(resta/3600000)%24;
+    const m = Math.floor(resta/60000)%60;
+    const s = Math.floor(resta/1000)%60;
+    document.getElementById("cuenta").innerText = `${d}d ${h}h ${m}m ${s}s`;
+  }
+  setInterval(actualizarCuenta,1000); actualizarCuenta();
+
+  async function enviar(){
+    const texto = document.getElementById("texto").value.trim();
+    if(!texto){ alert("Escribí tu chisme primero 😅"); return; }
+    const { error } = await supabase.from("chismes").insert({ texto });
+    if(error){ alert("Hubo un error: " + error.message); return; }
+    document.getElementById("formulario").classList.add("oculto");
+    document.getElementById("gracias").classList.remove("oculto");
+  }
+
+  function otro(){
+    document.getElementById("texto").value = "";
+    document.getElementById("gracias").classList.add("oculto");
+    document.getElementById("formulario").classList.remove("oculto");
+  }
+</script>
+</body>
+</html>
