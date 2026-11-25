@@ -40,6 +40,7 @@
   button{background:var(--papel);color:var(--fondo);border:none;border-radius:12px;
     padding:14px 22px;font-family:inherit;font-weight:700;font-size:1em;cursor:pointer}
   button:active{transform:scale(.97)}
+  button:disabled{opacity:.5}
 
   .gracias h2{font-family:'Instrument Serif',serif;font-weight:400;font-size:2.4em;margin:0 0 8px}
   .gracias p{color:var(--suave);margin:0 0 20px}
@@ -66,7 +67,7 @@
     <textarea id="texto" maxlength="1000" placeholder="¿Qué pasó? Sin nombres reales, eh..."></textarea>
     <div class="pie">
       <span id="contador">0 / 1000</span>
-      <button onclick="enviar()">Enviar</button>
+      <button id="btnEnviar" onclick="enviar()">Enviar</button>
     </div>
   </div>
 
@@ -90,7 +91,7 @@
   const TIKTOK = "https://www.tiktok.com/";
   // ===============================================
 
-  const supabase = window.supabase.createClient(
+  const db = window.supabase.createClient(
     "https://lfwoxdphbowfriqdrezl.supabase.co",
     "sb_publishable_rXxD1ZlBPunQ1YGHhXp93w_5cnA-4Tn"
   );
@@ -118,7 +119,9 @@
   async function enviar(){
     const texto = $("texto").value.trim();
     if(!texto){ alert("Escribí tu chisme primero"); return; }
-    const { error } = await supabase.from("chismes").insert({ texto });
+    $("btnEnviar").disabled = true; $("btnEnviar").innerText = "Enviando...";
+    const { error } = await db.from("chismes").insert({ texto });
+    $("btnEnviar").disabled = false; $("btnEnviar").innerText = "Enviar";
     if(error){ alert("Hubo un error: " + error.message); return; }
     $("formulario").classList.add("oculto");
     $("gracias").classList.remove("oculto");
@@ -132,4 +135,3 @@
 </script>
 </body>
 </html>
-
