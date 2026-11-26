@@ -3,124 +3,183 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#0b0b0c">
-<title>Chismes al aire</title>
+<meta name="theme-color" content="#0a0a0a">
+<title>Chismes — al aire</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Instrument+Serif:ital@1&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --negro:#0b0b0c;--blanco:#f4f4f2;--rojo:#ff453a;
-  --vidrio:rgba(244,244,242,.06);--linea:rgba(244,244,242,.12);--tenue:rgba(244,244,242,.55);
-  --suave:cubic-bezier(.2,.8,.2,1);
+  --tinta:#0a0a0a;--hueso:#ecebe6;--senal:#ff3b30;
+  --h06:rgba(236,235,230,.06);--h12:rgba(236,235,230,.12);--h22:rgba(236,235,230,.22);--h50:rgba(236,235,230,.5);
+  --curva:cubic-bezier(.22,1,.36,1);
 }
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;background:var(--negro);color:var(--blanco)}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html{background:var(--tinta)}
 body{
-  min-height:100dvh;display:flex;align-items:center;justify-content:center;
-  padding:calc(env(safe-area-inset-top) + 28px) 20px calc(env(safe-area-inset-bottom) + 28px);
-  font-family:Inter,system-ui,sans-serif;font-size:16px;line-height:1.5;
-  -webkit-font-smoothing:antialiased;
-  background-image:radial-gradient(rgba(244,244,242,.07) 1px,transparent 1px);
-  background-size:22px 22px;background-attachment:fixed;
+  min-height:100dvh;color:var(--hueso);background:var(--tinta);
+  font:400 16px/1.5 Inter,system-ui,sans-serif;letter-spacing:-.01em;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
 }
-main{width:100%;max-width:440px}
-svg{stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+/* Grano */
+body::after{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:50;opacity:.07;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+/* Letras gigantes detrás del vidrio */
+.fondo{position:fixed;inset:0;pointer-events:none;overflow:hidden;user-select:none}
+.fondo span{position:absolute;line-height:.8;white-space:nowrap}
+.fondo .al{top:calc(env(safe-area-inset-top) + 64px);right:-4vw;font:600 min(52vw,240px) Inter,sans-serif;letter-spacing:-.09em;color:rgba(236,235,230,.05)}
+.fondo .aire{bottom:calc(env(safe-area-inset-bottom) + 70px);left:-2vw;font:italic 400 min(58vw,270px) "Instrument Serif",serif;letter-spacing:-.03em;color:var(--senal);opacity:.5}
+
+.app{
+  position:relative;z-index:1;min-height:100dvh;max-width:460px;margin:0 auto;
+  display:flex;flex-direction:column;
+  padding:calc(env(safe-area-inset-top) + 18px) 20px calc(env(safe-area-inset-bottom) + 20px);
+}
+/* Barra superior */
+.top{display:flex;align-items:center;justify-content:space-between;height:36px}
+.marca{font-weight:600;letter-spacing:-.03em;font-size:17px}
+.marca em{font-family:"Instrument Serif",serif;font-weight:400;font-size:19px;color:var(--h50)}
+.vivo{display:flex;align-items:center;gap:8px;height:28px;padding:0 12px;border:1px solid var(--h12);border-radius:99px;
+  font:500 11px/1 "JetBrains Mono",monospace;letter-spacing:.06em;color:var(--h50)}
+.vivo i{width:6px;height:6px;border-radius:50%;background:var(--senal);box-shadow:0 0 10px var(--senal);animation:latido 2s ease-in-out infinite}
+@keyframes latido{50%{opacity:.3;box-shadow:none}}
 
 /* Pantallas */
-.pantalla{transition:opacity .45s var(--suave),transform .45s var(--suave)}
-.pantalla.fuera{opacity:0;transform:translateY(10px);pointer-events:none}
+.pantalla{flex:1;display:flex;flex-direction:column;justify-content:flex-end;
+  transition:opacity .6s var(--curva),transform .6s var(--curva),filter .6s var(--curva)}
+.pantalla.fuera{opacity:0;transform:translateY(16px);filter:blur(6px);pointer-events:none}
 .oculto{display:none}
+.pantalla>*{transition:opacity .7s var(--curva),transform .7s var(--curva)}
+.pantalla.fuera>*{opacity:0;transform:translateY(12px)}
+.pantalla>*:nth-child(2){transition-delay:.05s}.pantalla>*:nth-child(3){transition-delay:.1s}
+.pantalla>*:nth-child(4){transition-delay:.15s}.pantalla>*:nth-child(5){transition-delay:.2s}
 
-/* Encabezado */
-.vivo{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:500;letter-spacing:.08em;color:var(--tenue)}
-.vivo i{width:7px;height:7px;border-radius:50%;background:var(--rojo);animation:respira 2.4s ease-in-out infinite}
-@keyframes respira{50%{opacity:.35}}
-h1{font-size:40px;font-weight:600;letter-spacing:-.035em;line-height:1.05;margin:18px 0 10px}
-.sub{color:var(--tenue);margin:0 0 28px}
+.eti{font:500 11px/1 "JetBrains Mono",monospace;letter-spacing:.1em;color:var(--h50);text-transform:uppercase}
+h1{font-size:clamp(44px,13vw,60px);font-weight:600;letter-spacing:-.055em;line-height:.95;margin:14px 0 16px}
+h1 em{font-family:"Instrument Serif",serif;font-weight:400;letter-spacing:-.02em;font-size:1.08em}
+.bajada{color:var(--h50);font-size:15px;max-width:30ch;margin-bottom:28px}
 
 /* Vidrio */
 .vidrio{
-  background:var(--vidrio);border:1px solid var(--linea);border-radius:22px;
-  backdrop-filter:blur(24px) saturate(140%);-webkit-backdrop-filter:blur(24px) saturate(140%);
-  transition:border-color .3s var(--suave);
+  position:relative;border-radius:28px;
+  background:linear-gradient(var(--h06),var(--h06)),rgba(10,10,10,.35);
+  border:1px solid var(--h12);
+  backdrop-filter:blur(28px) saturate(160%);-webkit-backdrop-filter:blur(28px) saturate(160%);
+  box-shadow:inset 0 1px 0 var(--h12),0 30px 60px -20px rgba(0,0,0,.6);
+  transition:border-color .4s var(--curva),box-shadow .4s var(--curva);
 }
-.vidrio:focus-within{border-color:rgba(244,244,242,.3)}
+.vidrio:focus-within{border-color:var(--h22);box-shadow:inset 0 1px 0 var(--h22),0 30px 60px -20px rgba(0,0,0,.7)}
 
-textarea{
-  display:block;width:100%;height:180px;padding:20px 20px 0;
-  background:none;border:0;outline:0;resize:none;
-  color:var(--blanco);font:inherit;font-size:17px;
-}
-textarea::placeholder{color:rgba(244,244,242,.35)}
-.barra{display:flex;align-items:center;justify-content:space-between;padding:12px 12px 12px 20px}
-#contador{font-size:13px;color:var(--tenue);font-variant-numeric:tabular-nums;transition:color .3s}
-#contador.limite{color:var(--rojo)}
+textarea{display:block;width:100%;height:clamp(140px,28dvh,220px);padding:22px 22px 0;background:none;border:0;outline:0;resize:none;
+  color:var(--hueso);font:400 18px/1.45 Inter,sans-serif;letter-spacing:-.015em}
+textarea::placeholder{color:rgba(236,235,230,.3)}
 
-button,.boton{
-  display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  height:44px;padding:0 20px;border:0;border-radius:14px;
-  background:var(--blanco);color:var(--negro);font:inherit;font-weight:600;font-size:15px;
-  text-decoration:none;cursor:pointer;
-  transition:transform .2s var(--suave),opacity .2s;
+.pie{display:flex;align-items:center;gap:14px;padding:14px 14px 14px 22px}
+/* Onda de audio */
+.onda{flex:1;display:flex;align-items:center;gap:3px;height:28px}
+.onda b{flex:1;max-width:3px;height:100%;border-radius:2px;background:var(--h22);
+  transform:scaleY(var(--a,.12));transition:transform .35s var(--curva),background .35s}
+.onda.activa b{background:var(--h50)}
+#contador{font:500 12px/1 "JetBrains Mono",monospace;color:var(--h50);font-variant-numeric:tabular-nums;transition:color .3s}
+#contador.limite{color:var(--senal)}
+
+.enviar{
+  position:relative;flex:none;width:52px;height:52px;border:0;border-radius:50%;cursor:pointer;
+  background:var(--hueso);color:var(--tinta);display:grid;place-items:center;
+  transition:transform .3s var(--curva),background .3s,opacity .3s;
 }
-button:active,.boton:active{transform:scale(.97)}
-button:disabled{opacity:.5}
-.secundario{background:var(--vidrio);color:var(--blanco);border:1px solid var(--linea);
-  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}
-.ancho{width:100%;height:52px}
-.giro{width:16px;height:16px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:gira .7s linear infinite}
-@keyframes gira{to{transform:rotate(360deg)}}
+.enviar:active{transform:scale(.92)}
+.enviar:disabled{opacity:.35}
+.enviar svg{position:absolute;width:20px;height:20px;transition:opacity .25s,transform .4s var(--curva)}
+.enviar .ic-carga{opacity:0;animation:gira .8s linear infinite}
+.enviar.cargando .ic-flecha{opacity:0;transform:translateX(8px)}
+.enviar.cargando .ic-carga{opacity:1}
+@keyframes gira{to{rotate:360deg}}
+svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.privado{display:flex;align-items:center;gap:8px;margin-top:16px;color:var(--h50);font-size:13px}
+.privado svg{width:14px;height:14px}
 
 /* Confirmación */
-.tilde{width:44px;height:44px;color:var(--blanco)}
-.tilde path{stroke-dasharray:30;stroke-dashoffset:30}
-.ver .tilde path{transition:stroke-dashoffset .6s .15s var(--suave);stroke-dashoffset:0}
-.aviso{color:var(--tenue);margin:0;padding:20px 20px 0;font-size:15px}
-.cuenta{display:grid;grid-template-columns:repeat(4,1fr);padding:16px 8px 20px}
-.cuenta div{text-align:center}
-.cuenta b{display:block;font-size:34px;font-weight:600;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
-.cuenta span{font-size:12px;color:var(--tenue)}
-.acciones{display:grid;gap:10px;margin-top:14px}
+.sello{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--h22);margin-bottom:22px}
+.sello svg{width:24px;height:24px}
+.sello path{stroke-dasharray:24;stroke-dashoffset:24;transition:stroke-dashoffset .8s .35s var(--curva)}
+.pantalla:not(.fuera) .sello path{stroke-dashoffset:0}
 
-@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.reloj{padding:22px}
+.reloj .eti{display:block;margin-bottom:16px}
+.digitos{display:flex;align-items:baseline;justify-content:space-between}
+.digitos div{text-align:center;flex:1}
+.digitos b{display:block;font:500 clamp(34px,11vw,46px)/1 "JetBrains Mono",monospace;letter-spacing:-.06em;font-variant-numeric:tabular-nums}
+.digitos span{display:block;margin-top:8px;font:500 10px/1 "JetBrains Mono",monospace;letter-spacing:.1em;color:var(--h50);text-transform:uppercase}
+.digitos i{font:500 28px/1 "JetBrains Mono",monospace;color:var(--h22);font-style:normal;align-self:flex-start;padding-top:6px}
+.meta{margin-top:20px;padding-top:18px;border-top:1px solid var(--h12);color:var(--h50);font-size:14px}
+.meta strong{color:var(--hueso);font-weight:500}
+
+.botones{display:grid;gap:10px;margin-top:12px}
+.btn{height:56px;border-radius:18px;border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;
+  font:600 15px/1 Inter,sans-serif;letter-spacing:-.01em;text-decoration:none;transition:transform .3s var(--curva),background .3s}
+.btn:active{transform:scale(.97)}
+.btn svg{width:18px;height:18px}
+.claro{background:var(--hueso);color:var(--tinta)}
+.vacio{background:linear-gradient(var(--h06),var(--h06)),rgba(10,10,10,.35);color:var(--hueso);border:1px solid var(--h12);
+  backdrop-filter:blur(28px) saturate(160%);-webkit-backdrop-filter:blur(28px) saturate(160%);box-shadow:inset 0 1px 0 var(--h12)}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
-<main>
+<div class="fondo" aria-hidden="true"><span class="al">AL</span><span class="aire">aire</span></div>
 
-<section id="enviar" class="pantalla">
-  <span class="vivo"><i></i>AL AIRE PRONTO</span>
-  <h1>Contanos el chisme.</h1>
-  <p class="sub">Anónimo. Sin nombre, sin mail, sin nada.</p>
-  <div class="vidrio">
-    <textarea id="texto" maxlength="1000" placeholder="¿Qué pasó?"></textarea>
-    <div class="barra">
-      <span id="contador">0 / 1000</span>
-      <button id="btn" onclick="enviar()">Enviar</button>
+<div class="app">
+  <header class="top">
+    <span class="marca">chismes<em>.fm</em></span>
+    <span class="vivo"><i></i>PRÓXIMO VIVO</span>
+  </header>
+
+  <section id="enviar" class="pantalla">
+    <span class="eti">Buzón anónimo</span>
+    <h1>Contanos<br>el <em>chisme.</em></h1>
+    <p class="bajada">Lo leemos al aire, con la voz distorsionada. Nadie sabe quién lo mandó.</p>
+    <div class="vidrio">
+      <textarea id="texto" maxlength="1000" placeholder="¿Qué pasó?"></textarea>
+      <div class="pie">
+        <div class="onda" id="onda"></div>
+        <span id="contador">0</span>
+        <button class="enviar" id="btn" onclick="enviar()" aria-label="Enviar" disabled>
+          <svg class="ic-flecha" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          <svg class="ic-carga" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9"/></svg>
+        </button>
+      </div>
     </div>
-  </div>
-</section>
+    <p class="privado"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>No guardamos nombre, mail ni cuenta.</p>
+  </section>
 
-<section id="gracias" class="pantalla fuera oculto">
-  <svg class="tilde" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
-  <h1>Recibido.</h1>
-  <p class="sub">Tu chisme está en la fila. Capaz lo escuchás en el próximo vivo.</p>
-  <div class="vidrio">
-    <p class="aviso" id="aviso"></p>
-    <div class="cuenta" id="cuenta">
-      <div><b id="d">0</b><span>días</span></div>
-      <div><b id="h">0</b><span>horas</span></div>
-      <div><b id="m">0</b><span>min</span></div>
-      <div><b id="s">0</b><span>seg</span></div>
+  <section id="gracias" class="pantalla fuera oculto">
+    <div class="sello"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+    <span class="eti">Recibido</span>
+    <h1>Ya está<br>en la <em>fila.</em></h1>
+    <div class="vidrio reloj">
+      <span class="eti">Próximo vivo</span>
+      <div class="digitos" id="digitos">
+        <div><b id="d">00</b><span>días</span></div><i>:</i>
+        <div><b id="h">00</b><span>hs</span></div><i>:</i>
+        <div><b id="m">00</b><span>min</span></div><i>:</i>
+        <div><b id="s">00</b><span>seg</span></div>
+      </div>
+      <p class="meta" id="meta"></p>
     </div>
-  </div>
-  <div class="acciones">
-    <a class="boton secundario ancho" id="tiktok" target="_blank" rel="noopener">Seguinos en TikTok</a>
-    <button class="ancho" onclick="otro()">Mandar otro</button>
-  </div>
-</section>
+    <div class="botones">
+      <a class="btn vacio" id="tiktok" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M14 3v11.5a3.5 3.5 0 1 1-3.5-3.5"/><path d="M14 3c.5 2.8 2.5 4.5 5 4.8"/></svg>Seguinos en TikTok</a>
+      <button class="btn claro" onclick="otro()">Mandar otro</button>
+    </div>
+  </section>
+</div>
 
-</main>
 <script>
 // ====== CONFIGURACIÓN ======
 const FECHA_VIVO = "2026-12-07T21:00:00-03:00";
@@ -130,55 +189,78 @@ const TIKTOK = "https://www.tiktok.com/";
 
 const db=window.supabase.createClient("https://lfwoxdphbowfriqdrezl.supabase.co","sb_publishable_rXxD1ZlBPunQ1YGHhXp93w_5cnA-4Tn");
 const $=id=>document.getElementById(id);
+const quieto=matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 $("tiktok").href=TIKTOK;
+
+// Onda de audio: se mueve solo mientras escribís
+const onda=$("onda"),N=22,barras=[];
+for(let i=0;i<N;i++){const b=document.createElement("b");onda.appendChild(b);barras.push(b);}
+let calma;
+function latir(){
+  if(quieto)return;
+  onda.classList.add("activa");
+  barras.forEach((b,i)=>{
+    const centro=1-Math.abs(i-(N-1)/2)/(N/2);
+    b.style.setProperty("--a",(.15+Math.random()*.85*(.35+.65*centro)).toFixed(2));
+  });
+  clearTimeout(calma);
+  calma=setTimeout(()=>{onda.classList.remove("activa");barras.forEach(b=>b.style.setProperty("--a",".12"));},350);
+}
+
 $("texto").addEventListener("input",e=>{
   const n=e.target.value.length;
-  $("contador").textContent=n+" / 1000";
+  $("contador").textContent=n>900?(1000-n):n;
   $("contador").classList.toggle("limite",n>900);
+  $("btn").disabled=!e.target.value.trim();
+  latir();
 });
 
+// Cuenta regresiva
 const fecha=new Date(FECHA_VIVO);
 const dia=fecha.toLocaleDateString("es-AR",{weekday:"long",day:"numeric",month:"long"});
-const hora=fecha.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"});
-$("aviso").textContent=`Si llegamos a ${META} seguidores, salimos en vivo el ${dia} a las ${hora}.`;
-
+const hora=fecha.toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit",hourCycle:"h23"})+" hs";
+$("meta").innerHTML=`Si llegamos a <strong>${META.toLocaleString("es-AR")} seguidores</strong>, salimos en vivo el ${dia} a las ${hora}.`;
+const dos=n=>String(n).padStart(2,"0");
 function cuenta(){
   const r=fecha-new Date();
-  if(r<=0){$("cuenta").innerHTML="<div style='grid-column:span 4'><b>En vivo</b></div>";return;}
-  $("d").textContent=Math.floor(r/864e5);
-  $("h").textContent=Math.floor(r/36e5)%24;
-  $("m").textContent=Math.floor(r/6e4)%60;
-  $("s").textContent=Math.floor(r/1e3)%60;
+  if(r<=0){$("digitos").innerHTML='<div><b>EN VIVO</b></div>';return;}
+  $("d").textContent=dos(Math.floor(r/864e5));
+  $("h").textContent=dos(Math.floor(r/36e5)%24);
+  $("m").textContent=dos(Math.floor(r/6e4)%60);
+  $("s").textContent=dos(Math.floor(r/1e3)%60);
 }
 setInterval(cuenta,1000);cuenta();
 
 function ir(de,a){
   $(de).classList.add("fuera");
   setTimeout(()=>{
-    $(de).classList.add("oculto");$(de).classList.remove("ver");
+    $(de).classList.add("oculto");
     $(a).classList.remove("oculto");
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{$(a).classList.remove("fuera");$(a).classList.add("ver");}));
-    window.scrollTo(0,0);
-  },300);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>$(a).classList.remove("fuera")));
+    window.scrollTo({top:0});
+  },quieto?0:380);
 }
 
 async function enviar(){
   const texto=$("texto").value.trim();
-  if(!texto){$("texto").focus();return;}
-  const b=$("btn");b.disabled=true;b.innerHTML='<span class="giro"></span>';
+  if(!texto)return;
+  const b=$("btn");b.disabled=true;b.classList.add("cargando");
   const {error}=await db.from("chismes").insert({texto});
-  b.disabled=false;b.textContent="Enviar";
+  b.classList.remove("cargando");
   if(error){
+    b.disabled=false;
     alert(error.message.includes("Demasiados")?"Mandaste muchos seguidos. Esperá un minuto.":"Hubo un error, probá de nuevo.");
     return;
   }
+  if(navigator.vibrate)navigator.vibrate(12);
   ir("enviar","gracias");
 }
 
 function otro(){
-  $("texto").value="";$("contador").textContent="0 / 1000";$("contador").classList.remove("limite");
+  $("texto").value="";$("contador").textContent="0";$("contador").classList.remove("limite");$("btn").disabled=true;
   ir("gracias","enviar");
+  setTimeout(()=>$("texto").focus(),500);
 }
 </script>
 </body>
